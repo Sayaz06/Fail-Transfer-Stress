@@ -26,7 +26,8 @@
 
     // Path: uid/type/filename
     const safeName = sanitizeFileName(file.name);
-    const ref = storage.ref(`${user.uid}/${type}/${Date.now()}_${safeName}`);
+    const path = `${user.uid}/${type}/${Date.now()}_${safeName}`;
+    const ref = storage.ref(path);
 
     // Upload
     const snapshot = await ref.put(file);
@@ -43,15 +44,26 @@
       size: file.size,
       mime: file.type || "application/octet-stream",
       url,
+      storagePath: path, // simpan path untuk delete
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
     };
     await db.collection("transfers").add(entry);
     return url;
   }
 
+  async function deleteTransfer(db, storage, docId, path) {
+    // Padam dokumen Firestore
+    await db.collection("transfers").doc(docId).delete();
+    // Padam file di Storage jika ada path
+    if (path) {
+      const ref = storage.ref(path);
+      await ref.delete();
+    }
+  }
+
   function sanitizeFileName(name) {
     return name.replace(/[^\w.\-]+/g, "_");
   }
 
-  window.Uploader = { sendMessage, uploadFile };
+  window.Uploader = { sendMessage, uploadFile, deleteTransfer };
 })();
