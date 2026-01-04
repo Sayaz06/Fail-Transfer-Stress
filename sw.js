@@ -1,4 +1,4 @@
-const CACHE_NAME = "fts-cache-v6";
+const CACHE_NAME = "fts-cache-v7";
 const OFFLINE_URLS = [
   "./",
   "./index.html",
