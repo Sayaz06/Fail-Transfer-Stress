@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fail Transfer Stress</title>
+  <meta name="theme-color" content="#6366f1" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Page Login -->
+  <div id="login-page" class="page">
+    <div class="card">
+      <h1 class="title">Login with Google</h1>
+      <p class="subtitle">Operated by <span class="brand">Sayaz</span></p>
+      <button id="login-btn" class="btn btn-primary">Login</button>
+    </div>
+  </div>
+
+  <!-- Home Page -->
+  <div id="home-page" class="page hidden">
+    <header class="header">
+      <div class="left">
+        <h1 class="title">Transfer Your Files</h1>
+        <p class="subtitle">operated by <span class="brand">Sayaz</span></p>
+      </div>
+      <div class="right">
+        <button id="logout-btn" class="btn btn-ghost">Logout</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <button class="btn btn-primary" data-type="message">Type Your Message</button>
+      <button class="btn btn-primary" data-type="image">Transfer Your Image</button>
+      <button class="btn btn-primary" data-type="pdf">Transfer Your PDF</button>
+      <button class="btn btn-primary" data-type="document">Transfer Your Document</button>
+      <button class="btn btn-primary" data-type="presentation">Transfer Your Presentation</button>
+      <button class="btn btn-primary" data-type="sheets">Transfer Your Sheets</button>
+      <button class="btn btn-primary" data-type="video">Transfer Your Video</button>
+      <button class="btn btn-primary" data-type="music">Transfer Your Music</button>
+      <button class="btn btn-primary" data-type="coding">Transfer Your Coding</button>
+    </main>
+
+    <!-- Panel transfer -->
+    <section id="panel" class="panel hidden">
+      <div class="panel-header">
+        <h2 id="panel-title">Transfer</h2>
+        <button id="close-panel" class="btn btn-ghost">Close</button>
+      </div>
+
+      <!-- Message input -->
+      <div id="message-section" class="section hidden">
+        <label class="label">Your message</label>
+        <textarea id="message-input" class="input" rows="6" placeholder="Type your message here..."></textarea>
+        <div class="actions">
+          <button id="send-message" class="btn btn-primary">Send message</button>
+        </div>
+      </div>
+
+      <!-- File input -->
+      <div id="file-section" class="section hidden">
+        <label class="label">Select file</label>
+        <input id="file-input" type="file" class="input-file" />
+        <div class="actions">
+          <button id="upload-file" class="btn btn-primary">Upload file</button>
+        </div>
+        <p class="note">Supported: images, pdf, doc/docx, ppt/pptx, xls/xlsx, txt/code, video, audio.</p>
+      </div>
+
+      <div id="status" class="status"></div>
+    </section>
+
+    <!-- Recent transfers -->
+    <section id="recent" class="recent">
+      <h3 class="recent-title">Recent transfers</h3>
+      <div id="recent-list" class="recent-list"></div>
+    </section>
+  </div>
+
+  <!-- Firebase SDKs (compat for simple script usage) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+
+  <script src="app.js"></script>
+  <script src="upload.js"></script>
+</body>
+</html>
