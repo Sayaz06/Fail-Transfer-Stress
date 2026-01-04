@@ -168,19 +168,36 @@ async function loadRecentTransfers() {
 
     const html = snap.docs.map(doc => {
       const d = doc.data();
+      const id = doc.id;
       const when = d.timestamp && d.timestamp.toDate ? d.timestamp.toDate() : null;
       const time = when ? when.toLocaleString() : "";
       const link = d.url ? `<a href="${d.url}" target="_blank" rel="noopener">Open</a>` : "";
       const name = d.filename || (d.text ? (d.text.slice(0, 40) + (d.text.length > 40 ? "…" : "")) : "");
+      const delBtn = `<button class="btn btn-ghost delete-btn" data-id="${id}" data-path="${d.storagePath || ""}">Delete</button>`;
       return `
         <div class="item">
           <div><strong>${d.type || "unknown"}</strong></div>
           ${name ? `<div>${name}</div>` : ""}
           ${link}
           <div class="meta">${time} • ${d.sender || ""}</div>
+          ${delBtn}
         </div>`;
     }).join("");
     recentList.innerHTML = html || "<div class='item'><div>No items yet</div></div>";
+
+    // Attach delete handlers
+    document.querySelectorAll(".delete-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const docId = btn.dataset.id;
+        const path = btn.dataset.path;
+        try {
+          await window.Uploader.deleteTransfer(db, storage, docId, path);
+          loadRecentTransfers();
+        } catch (e) {
+          alert("Delete failed: " + e.message);
+        }
+      });
+    });
   } catch (e) {
     recentList.innerHTML = "<div class='item'><div class='meta'>Failed to load: " + e.message + "</div></div>";
   }
