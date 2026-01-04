@@ -185,19 +185,25 @@ async function loadRecentTransfers() {
     }).join("");
     recentList.innerHTML = html || "<div class='item'><div>No items yet</div></div>";
 
-    // Attach delete handlers
-    document.querySelectorAll(".delete-btn").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const docId = btn.dataset.id;
-        const path = btn.dataset.path;
-        try {
-          await window.Uploader.deleteTransfer(db, storage, docId, path);
-          loadRecentTransfers();
-        } catch (e) {
-          alert("Delete failed: " + e.message);
-        }
-      });
-    });
+// Attach delete handlers
+document.querySelectorAll(".delete-btn").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    const docId = btn.dataset.id;
+    const path = btn.dataset.path;
+
+    // Tunjuk confirm dialog
+    const sure = confirm("Are you sure you want to delete this item?");
+    if (!sure) return; // kalau user tekan Cancel, stop
+
+    try {
+      await window.Uploader.deleteTransfer(db, storage, docId, path);
+      loadRecentTransfers();
+    } catch (e) {
+      alert("Delete failed: " + e.message);
+    }
+  });
+});
+
   } catch (e) {
     recentList.innerHTML = "<div class='item'><div class='meta'>Failed to load: " + e.message + "</div></div>";
   }
