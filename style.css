@@ -116,3 +116,20 @@ body {
 .item .meta { color: var(--muted); font-size: 12px; }
 .item a { color: #a5b4fc; text-decoration: none; }
 .item a:hover { text-decoration: underline; }
+
+.delete-btn {
+  margin-top: 6px;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  border-color: var(--grad-start);
+  color: var(--text);
+  background: rgba(99, 102, 241, 0.1); /* sedikit indigo hover */
+}
