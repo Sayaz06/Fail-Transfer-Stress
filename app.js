@@ -104,17 +104,20 @@ function openPanel(type) {
   };
 
   uploadFileBtn.onclick = async () => {
-    const file = fileInput.files && fileInput.files[0];
-    if (!file) return alert("Please select a file");
-    statusEl.textContent = "Uploading...";
-    try {
-      await window.Uploader.uploadFile(storage, db, auth, type, file);
-      statusEl.textContent = "Uploaded ✔️";
-      fileInput.value = "";
-      loadRecentTransfers();
-    } catch (e) {
-      statusEl.textContent = "Failed: " + e.message;
-    }
+const files = fileInput.files;
+if (!files || files.length === 0) return alert("Please select file(s)");
+statusEl.textContent = "Uploading...";
+
+try {
+  for (const file of files) {
+    await window.Uploader.uploadFile(storage, db, auth, type, file);
+  }
+  statusEl.textContent = "All files uploaded ✔️";
+  fileInput.value = "";
+  loadRecentTransfers();
+} catch (e) {
+  statusEl.textContent = "Failed: " + e.message;
+}
   };
 
   closePanelBtn.onclick = () => {
