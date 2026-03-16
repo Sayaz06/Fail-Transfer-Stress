@@ -9,7 +9,6 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Page Login -->
   <div id="login-page" class="page">
     <div class="card">
       <h1 class="title">Login with Google</h1>
@@ -18,7 +17,6 @@
     </div>
   </div>
 
-  <!-- Home Page -->
   <div id="home-page" class="page hidden">
     <header class="header">
       <div class="left">
@@ -42,14 +40,12 @@
       <button class="btn btn-primary" data-type="coding">Transfer Your Coding</button>
     </main>
 
-    <!-- Panel transfer -->
     <section id="panel" class="panel hidden">
       <div class="panel-header">
         <h2 id="panel-title">Transfer</h2>
         <button id="close-panel" class="btn btn-ghost">Close</button>
       </div>
 
-      <!-- Message input -->
       <div id="message-section" class="section hidden">
         <label class="label">Your message</label>
         <textarea id="message-input" class="input" rows="6" placeholder="Type your message here..."></textarea>
@@ -58,7 +54,6 @@
         </div>
       </div>
 
-      <!-- File input -->
       <div id="file-section" class="section hidden">
         <label class="label">Select file</label>
         <input id="file-input" type="file" class="input-file" multiple />
@@ -69,16 +64,16 @@
       </div>
 
       <div id="status" class="status"></div>
+      
+      <div id="progress-container" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;"></div>
     </section>
 
-    <!-- Recent transfers -->
     <section id="recent" class="recent">
       <h3 class="recent-title">Recent transfers</h3>
       <div id="recent-list" class="recent-list"></div>
     </section>
   </div>
 
-  <!-- Firebase SDKs (compat for simple script usage) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
