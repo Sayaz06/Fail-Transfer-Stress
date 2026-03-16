@@ -32,6 +32,7 @@ const fileInput = document.getElementById("file-input");
 const uploadFileBtn = document.getElementById("upload-file");
 const statusEl = document.getElementById("status");
 const recentList = document.getElementById("recent-list");
+const progressContainer = document.getElementById("progress-container"); // Tambahan untuk progress bar
 
 // PWA: register service worker
 if ("serviceWorker" in navigator) {
@@ -78,6 +79,7 @@ function openPanel(type) {
   statusEl.textContent = "";
   messageSection.classList.add("hidden");
   fileSection.classList.add("hidden");
+  if (progressContainer) progressContainer.innerHTML = ""; // Bersihkan progress bar lama bila buka panel
 
   panelTitle.textContent = labelForType(type);
 
@@ -104,20 +106,71 @@ function openPanel(type) {
   };
 
   uploadFileBtn.onclick = async () => {
-const files = fileInput.files;
-if (!files || files.length === 0) return alert("Please select file(s)");
-statusEl.textContent = "Uploading...";
+    const files = fileInput.files;
+    if (!files || files.length === 0) return alert("Please select file(s)");
+    statusEl.textContent = "Uploading...";
 
-try {
-  for (const file of files) {
-    await window.Uploader.uploadFile(storage, db, auth, type, file);
-  }
-  statusEl.textContent = "All files uploaded ✔️";
-  fileInput.value = "";
-  loadRecentTransfers();
-} catch (e) {
-  statusEl.textContent = "Failed: " + e.message;
-}
+    if (progressContainer) progressContainer.innerHTML = ""; // Bersihkan kontena sebelum upload baru
+
+    try {
+      // Guna Promise.all supaya boleh upload serentak
+      const uploadPromises = Array.from(files).map(file => {
+        // Bina elemen UI untuk garisan progress fail ini
+        const fileWrapper = document.createElement("div");
+        fileWrapper.style.marginBottom = "10px";
+
+        const fileLabel = document.createElement("div");
+        fileLabel.textContent = file.name;
+        fileLabel.style.fontSize = "14px";
+        fileLabel.style.marginBottom = "5px";
+        fileLabel.style.color = "#333";
+        fileLabel.style.wordBreak = "break-all";
+
+        const progressBarContainer = document.createElement("div");
+        progressBarContainer.style.width = "100%";
+        progressBarContainer.style.backgroundColor = "#e0e0e0";
+        progressBarContainer.style.borderRadius = "4px";
+        progressBarContainer.style.overflow = "hidden";
+
+        const progressBar = document.createElement("div");
+        progressBar.style.width = "0%";
+        progressBar.style.height = "8px";
+        progressBar.style.backgroundColor = "#6366f1"; // Warna tema
+        progressBar.style.transition = "width 0.2s ease";
+
+        const progressText = document.createElement("div");
+        progressText.textContent = "0%";
+        progressText.style.fontSize = "12px";
+        progressText.style.textAlign = "right";
+        progressText.style.marginTop = "2px";
+        progressText.style.color = "#666";
+
+        // Gabungkan elemen ke dalam satu div
+        progressBarContainer.appendChild(progressBar);
+        fileWrapper.appendChild(fileLabel);
+        fileWrapper.appendChild(progressBarContainer);
+        fileWrapper.appendChild(progressText);
+        if (progressContainer) progressContainer.appendChild(fileWrapper);
+
+        // Callback untuk kemaskini peratusan garisan yang dipanggil dari upload.js
+        const onProgress = (percent) => {
+          progressBar.style.width = percent + "%";
+          progressText.textContent = Math.round(percent) + "%";
+        };
+
+        // Panggil fungsi uploadFile dengan callback onProgress
+        return window.Uploader.uploadFile(storage, db, auth, type, file, onProgress);
+      });
+
+      // Tunggu kesemua fail siap dimuat naik
+      await Promise.all(uploadPromises);
+
+      statusEl.textContent = "All files uploaded ✔️";
+      fileInput.value = "";
+      loadRecentTransfers();
+    } catch (e) {
+      statusEl.textContent = "Failed: " + e.message;
+    }
   };
 
   closePanelBtn.onclick = () => {
@@ -125,6 +178,7 @@ try {
     statusEl.textContent = "";
     messageInput.value = "";
     fileInput.value = "";
+    if (progressContainer) progressContainer.innerHTML = ""; // Tutup panel = bersihkan progress bar
   };
 }
 
@@ -188,24 +242,24 @@ async function loadRecentTransfers() {
     }).join("");
     recentList.innerHTML = html || "<div class='item'><div>No items yet</div></div>";
 
-// Attach delete handlers
-document.querySelectorAll(".delete-btn").forEach(btn => {
-  btn.addEventListener("click", async () => {
-    const docId = btn.dataset.id;
-    const path = btn.dataset.path;
+    // Attach delete handlers
+    document.querySelectorAll(".delete-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const docId = btn.dataset.id;
+        const path = btn.dataset.path;
 
-    // Tunjuk confirm dialog
-    const sure = confirm("Are you sure you want to delete this item?");
-    if (!sure) return; // kalau user tekan Cancel, stop
+        // Tunjuk confirm dialog
+        const sure = confirm("Are you sure you want to delete this item?");
+        if (!sure) return; // kalau user tekan Cancel, stop
 
-    try {
-      await window.Uploader.deleteTransfer(db, storage, docId, path);
-      loadRecentTransfers();
-    } catch (e) {
-      alert("Delete failed: " + e.message);
-    }
-  });
-});
+        try {
+          await window.Uploader.deleteTransfer(db, storage, docId, path);
+          loadRecentTransfers();
+        } catch (e) {
+          alert("Delete failed: " + e.message);
+        }
+      });
+    });
 
   } catch (e) {
     recentList.innerHTML = "<div class='item'><div class='meta'>Failed to load: " + e.message + "</div></div>";
