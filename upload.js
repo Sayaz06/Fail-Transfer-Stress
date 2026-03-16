@@ -21,7 +21,8 @@
   }
 
   // Upload file to Storage and record metadata in Firestore
-  async function uploadFile(storage, db, auth, type, file) {
+  // Tambah parameter onProgress untuk terima peratusan muat naik
+  async function uploadFile(storage, db, auth, type, file, onProgress) {
     const user = await ensureAuth(auth);
 
     // Path: uid/type/filename
@@ -29,26 +30,50 @@
     const path = `${user.uid}/${type}/${Date.now()}_${safeName}`;
     const ref = storage.ref(path);
 
-    // Upload
-    const snapshot = await ref.put(file);
+    // Tukar kepada Promise supaya kita boleh pantau 'state_changed' untuk progress bar
+    return new Promise((resolve, reject) => {
+      const uploadTask = ref.put(file);
 
-    // Get URL
-    const url = await snapshot.ref.getDownloadURL();
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          // Kira peratusan muat naik
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          // Hantar peratusan ke app.js jika fungsi onProgress wujud
+          if (onProgress && typeof onProgress === "function") {
+            onProgress(progress);
+          }
+        },
+        (error) => {
+          // Jika muat naik gagal
+          reject(error);
+        },
+        async () => {
+          // Jika muat naik berjaya sepenuhnya
+          try {
+            // Get URL
+            const url = await uploadTask.snapshot.ref.getDownloadURL();
 
-    // Record metadata
-    const entry = {
-      uid: user.uid,
-      sender: user.email || user.uid,
-      type,
-      filename: safeName,
-      size: file.size,
-      mime: file.type || "application/octet-stream",
-      url,
-      storagePath: path, // simpan path untuk delete
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-    };
-    await db.collection("transfers").add(entry);
-    return url;
+            // Record metadata
+            const entry = {
+              uid: user.uid,
+              sender: user.email || user.uid,
+              type,
+              filename: safeName,
+              size: file.size,
+              mime: file.type || "application/octet-stream",
+              url,
+              storagePath: path, // simpan path untuk delete
+              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            };
+            await db.collection("transfers").add(entry);
+            resolve(url);
+          } catch (err) {
+            reject(err);
+          }
+        }
+      );
+    });
   }
 
   async function deleteTransfer(db, storage, docId, path) {
